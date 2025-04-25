@@ -71,6 +71,3 @@ O FuriaBot é um chatbot desenvolvido para fornecer informações e interagir co
     git checkout -b minha-branch
     ```
 - Envie um pull request com suas contribuições.
-
-## Licença
-Este projeto está licenciado sob a [Licença MIT](LICENSE).
