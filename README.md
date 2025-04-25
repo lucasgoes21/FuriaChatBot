@@ -32,21 +32,26 @@ O FuriaBot é um chatbot desenvolvido para fornecer informações e interagir co
 ## Instalação
 1. Clone o repositório:
     ```bash
-    git clone https://github.com/seu-usuario/FuriaBot.git
+    git clone https://github.com/seu-usuario/FuriaChatBot.git
     ```
 2. Navegue até o diretório do projeto:
     ```bash
-    cd FuriaBot
+    cd Api
     ```
 3. Instale as dependências do backend:
     ```bash
     pip install -r requirements.txt
     ```
-4. Instale as dependências do frontend:
+4. Navegue até o diretório do projeto:
+    ```bash
+    cd..
+    cd Front
+    ```
+3. Instale as dependências do Frontend:
     ```bash
     npm install
     ```
-5. Configure o banco de dados PostgreSQL e as variáveis de ambiente necessárias.
+6. Configure o banco de dados PostgreSQL e as variáveis de ambiente necessárias.
 
 ## Uso
 1. Inicie o backend:
