@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef } from "react"; // ✅ Agora importa o useEffect
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import ReactMarkdown from "react-markdown";
 import "./App.css";
 
 function App() {
   const [messages, setMessages] = useState([]); // Estado para armazenar as mensagens
   const [inputValue, setInputValue] = useState(""); // Estado para armazenar o valor do input
+  const [isLoading, setIsLoading] = useState(false); // Estado para controlar o carregamento
+
   const divRef = useRef(null); // Referência para o div que contém as mensagens
 
   const scrollToBottom = () => {
@@ -18,20 +19,58 @@ function App() {
     scrollToBottom(); // sempre que uma mensagem for enviada
   }, [messages]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputValue.trim() === "") return; // Evita enviar mensagens vazias
-  
-    // Adiciona a mensagem do usuário e a resposta do bot
-    const newMessages = [
-      ...messages,
-      { type: "person", message: inputValue },
-      { type: "bot", message: "Mensagem recebida!" }, // Mensagem do bot
-    ];
-  
-    setMessages(newMessages); // Atualiza o vetor de mensagens
-    setInputValue(""); // Limpa o input
-  };
 
+    setIsLoading(true); // Define o estado de carregamento como verdadeiro
+
+    // Adiciona a mensagem do usuário ao chat
+    const newMessages = [...messages, { type: "person", message: inputValue }];
+    setMessages(newMessages);
+
+    try {
+      const formattedMessages = messages
+        .map(
+          (msg) => `${msg.type === "bot" ? "Bot" : "Usuário"}: ${msg.message}`
+        )
+        .join("\n");
+
+      // Cria o texto final que será enviado ao back-end
+      const finalMessage = `[${formattedMessages}] essa é nossa conversa antiga,${inputValue} Responda como um Torcedor fanático do time de CS:GO da Furia, em português.]`;
+
+      // Faz a requisição para o back-end
+      const response = await fetch("http://127.0.0.1:8000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: finalMessage }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao se comunicar com o servidor.");
+      }
+
+      const data = await response.json();
+
+      // Adiciona a resposta do bot ao chat
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { type: "bot", message: data.response },
+      ]);
+    } catch (error) {
+      console.error("Erro:", error);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { type: "bot", message: "Erro ao se comunicar com o servidor." },
+      ]);
+    }
+    finally{
+      setIsLoading(false); // Desativa o estado de carregamento
+    }
+
+    setInputValue(""); // Limpa o campo de entrada
+  };
   return (
     <div className="App w-screen h-screen flex flex-col items-start justify-center bg-cover gap-3 p-5 px-10 bg-[url('assets/bg.png')] ">
       <div id="header" className="w-full flex justify-center ">
@@ -110,7 +149,38 @@ function App() {
             } p-2.5 rounded-lg`}
             style={{ maxWidth: "50%" }}
           >
-            <h1 className="text-white text-base break-words">{msg.message}</h1>
+            <ReactMarkdown
+                  components={{
+                    p: ({ node, ...props }) => (
+                      <p className="text-white text-base break-words" {...props} />
+                    ),
+                    a: ({ node, ...props }) => (
+                      <a
+                        className="text-blue-400 underline hover:text-blue-300"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        {...props}
+                      />
+                    ),
+                    strong: ({ node, ...props }) => (
+                      <strong className="text-white font-bold" {...props} />
+                    ),
+                    em: ({ node, ...props }) => (
+                      <em className="text-white italic" {...props} />
+                    ),
+                    ul: ({ node, ...props }) => (
+                      <ul className="text-white list-disc ml-5" {...props} />
+                    ),
+                    ol: ({ node, ...props }) => (
+                      <ol className="text-white list-decimal ml-5" {...props} />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li className="text-white" {...props} />
+                    ),
+                  }}
+                >
+                  {msg.message}
+                </ReactMarkdown>
           </div>
         </div>
       ))}
@@ -128,6 +198,7 @@ function App() {
       placeholder="Fala comigo, Furioso!"
       value={inputValue}
       onChange={(e) => setInputValue(e.target.value)}
+      disabled={isLoading}
       onKeyDown={(e) => {
         if (e.key === "Enter") handleSendMessage();
       }}
@@ -136,6 +207,7 @@ function App() {
     <button
       id="submitButton"
       onClick={handleSendMessage}
+      disabled={isLoading}
       className="w-[40px] h-[40px] flex items-center justify-center bg-[#808080] rounded-full text-white hover:bg-[#6c6c6c] transition"
     >
       ➤
