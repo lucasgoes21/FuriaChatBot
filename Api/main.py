@@ -114,6 +114,10 @@ def limit_history(messages, max_tokens=8000):
     limited_messages.reverse()
     return limited_messages
 
+@app.get("/")
+async def root():
+    return {"message": "Bem-vindo ao FURIA ChatBot API!"}
+    
 # Rota POST para o chat
 @app.post("/chat")
 async def chat(request: ChatRequest):
