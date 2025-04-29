@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-dotenv
+cloudscraper
+beautifulsoup4
+tiktoken
+azure-ai-ml
+azure-core
+sqlalchemy
+aiosqlite
