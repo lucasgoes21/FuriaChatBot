@@ -8,3 +8,5 @@ azure-ai-ml
 azure-core
 sqlalchemy
 aiosqlite
+azure-openai
+openai
