@@ -9,3 +9,4 @@ azure-core
 sqlalchemy
 aiosqlite
 openai
+azure.ai.inference
