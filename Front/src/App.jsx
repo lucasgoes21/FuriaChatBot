@@ -36,7 +36,7 @@ function App() {
         .join("\n");
 
       // Cria o texto final que será enviado ao back-end
-      const finalMessage = `[${formattedMessages}] essa é nossa conversa antiga,${inputValue} Responda como um Torcedor fanático do time de CS:GO da Furia, em português.]`;
+      const finalMessage = `${inputValue}`;
 
       // Faz a requisição para o back-end
       const response = await fetch("http://127.0.0.1:8000/chat", {
