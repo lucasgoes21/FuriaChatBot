@@ -27,7 +27,7 @@ async def startup():
         await conn.run_sync(Base.metadata.create_all)
 
 
-    print("Banco de dados inicializado com sucesso.")
+    
 
 async def chat(message):
     await save_message(sender="user", content=message)
@@ -61,7 +61,6 @@ url = 'https://www.hltv.org/team/8297/furia'
 # URL do site que você deseja acessar
 scraper = cloudscraper.create_scraper()  # cria um navegador fake
 furiaHTML = scraper.get(url)
-print(furiaHTML)  # Verifica se a requisição foi bem-sucedida (200)
 soup = BeautifulSoup(furiaHTML.text, 'html.parser') # Imprime o HTML formatado
 
 # Extrai informações do HTML
@@ -95,7 +94,7 @@ async def chatAI(message):
     return {"response": bot_response}
 
 
-def limit_history(messages, max_tokens=100):
+def limit_history(messages, max_tokens=8000):
     total_tokens = 0
     limited_messages = []
 
@@ -119,24 +118,38 @@ async def chat(request: ChatRequest):
     user_message = request.message
     bot_response = ""
     mensagem_usuario = user_message.lower()
-    print(mensagem_usuario)
+    
 
     if any(palavra in mensagem_usuario for palavra in ["jogo", "horário", "agenda", "partida", "jogos", "data"]):
-        print("match")
+        
         bot_response = bot_response + str(await chatAI(user_message + "[Ultilize esses dados para responder a pergunta]"  + str(event)))
     
     if any(palavra in mensagem_usuario for palavra in ["time", "escalação","escalaçao","escalacao", "jogadores", "lineup"]):
-        print("lineup")
+        
         bot_response = bot_response + str(await chatAI(user_message + "[Ultilize esses dados para responder a pergunta]" + str(player_cards)))
     
     if any(palavra in mensagem_usuario for palavra in ["campeonato", "colocação", "ganhou", "final", "semifinais", "semi", "finais", "semifinal", "major", "LAN", "ranking"]):
-        print("stats")
+        
         bot_response = bot_response + str(await chatAI(user_message + "[Ultilize esses dados para responder a pergunta]" + str(stats)))
     
     # Salva a mensagem do usuário no banco de dados
     await save_message(sender="user", content=user_message)
 
-    botMessage = await chatAI(user_message +"[ Ultilize esses dados para responder a pergunta, se nao ouver dados, responda normalmente"+ bot_response+ "]" + " Responda como um Torcedor do time de CS:GO da Furia, em português.")
+    # Obtem mensagens do banco de dados
+    OldMessages = await get_all_messages()
+
+    
+    
+    OldMessages = [(message.sender, message.content) for message in OldMessages]
+
+
+    messegeRequest = "["+ str(OldMessages) +", essas sao as menssagens antigas]"+ user_message +"[ Ultilize esses dados para responder a pergunta, se nao ouver dados, responda normalmente "+ bot_response + "]" + " Responda como um Torcedor do time de CS:GO da Furia, em português."
+    
+    messegeRequest = limit_history(messegeRequest, max_tokens=8000)
+
+    
+    # Chama a função chatAI com a mensagem do usuário
+    botMessage = await chatAI("".join(messegeRequest))
 
     # Salva a resposta do bot no banco de dados
     await save_message(sender="bot", content=botMessage["response"])
