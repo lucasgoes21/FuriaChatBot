@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from crud import save_message, get_all_messages
 from model import Base
 from db import engine
+from datetime import date
 import os
 
 # Carregar variáveis de ambiente
@@ -29,24 +30,23 @@ async def startup():
 
     
 
-async def chat(message):
-    await save_message(sender="user", content=message)
-    return "ok"
 
+# Adiciona o middleware CORS para permitir requisições de diferentes origens
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"],  # Permite requisições de qualquer origem
+    allow_credentials=True,  # Permite envio de cookies e credenciais
+    allow_methods=["*"],  # Permite todos os métodos HTTP (GET, POST, etc.)
+    allow_headers=["*"],  # Permite todos os cabeçalhos
 )
 
-# Configurações do cliente Azure
-endpoint = "https://models.github.ai/inference"
-model = "openai/gpt-4.1-mini"
-token = os.getenv("GITHUB_TOKEN")
-encoder = tiktoken.get_encoding("cl100k_base")
+# Configurações do cliente Azure para o serviço de inferência
+endpoint = "https://models.github.ai/inference"  # URL do endpoint do serviço de inferência
+model = "openai/gpt-4.1"  # Nome do modelo a ser utilizado
+token = os.getenv("GITHUB_TOKEN")  # Token de autenticação obtido das variáveis de ambiente
+encoder = tiktoken.get_encoding("cl100k_base")  # Inicializa o codificador para contagem de tokens
 
+# Cria o cliente para o serviço de inferência
 client = ChatCompletionsClient(
     endpoint=endpoint,
     credential=AzureKeyCredential(token),
@@ -73,11 +73,13 @@ event = soup.select('tr.event-header-cell, tr.team-row, div.empty-state')
 def count_tokens(text):
     return len(encoder.encode(text))
 
+# Função para fazer a requisição ao serviço de inferência
 async def chatAI(message):
     # Verifica se a mensagem do usuário foi fornecida
     if not message:
         raise HTTPException(status_code=400, detail="A mensagem do usuário é obrigatória.")
 
+    # Faz a requisição ao serviço de inferência
     response = client.complete(
         messages=[
             SystemMessage(""),
@@ -93,7 +95,7 @@ async def chatAI(message):
 
     return {"response": bot_response}
 
-
+# Função para limitar o histórico de mensagens
 def limit_history(messages, max_tokens=8000):
     total_tokens = 0
     limited_messages = []
@@ -119,7 +121,7 @@ async def chat(request: ChatRequest):
     bot_response = ""
     mensagem_usuario = user_message.lower()
     
-
+    # Verifica se a mensagem do usuário contém palavras-chave relacionadas a jogos, escalação ou estatísticas
     if any(palavra in mensagem_usuario for palavra in ["jogo", "horário", "agenda", "partida", "jogos", "data"]):
         
         bot_response = bot_response + str(await chatAI(user_message + "[Ultilize esses dados para responder a pergunta]"  + str(event)))
@@ -137,14 +139,11 @@ async def chat(request: ChatRequest):
 
     # Obtem mensagens do banco de dados
     OldMessages = await get_all_messages()
-
-    
-    
     OldMessages = [(message.sender, message.content) for message in OldMessages]
-
-
-    messegeRequest = "["+ str(OldMessages) +", essas sao as menssagens antigas]"+ user_message +"[ Ultilize esses dados para responder a pergunta, se nao ouver dados, responda normalmente "+ bot_response + "]" + " Responda como um Torcedor do time de CS:GO da Furia, em português."
-    
+   
+    # Limita o número de mensagens a serem enviadas para o modelo
+    messegeRequest = "["+ str(date.today().strftime("%d/%m/%Y")) +"<-data de hoje, "+ str(OldMessages) +", essas sao as menssagens antigas]"+ user_message +"[ Ultilize esses dados para responder a pergunta, se nao ouver dados, responda normalmente "+ bot_response + "]" + " Responda como um Torcedor do time de CS:GO da Furia, em português."
+    print("data de hoje asdasdasdasdasdasdasdasdasd "+str(date.today().strftime("%d/%m/%Y")))
     messegeRequest = limit_history(messegeRequest, max_tokens=8000)
 
     

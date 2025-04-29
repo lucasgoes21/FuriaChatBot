@@ -1,73 +1,102 @@
-# Documentação do Projeto FuriaBot
+# 🦁 FURIA ChatBot
 
-## Visão Geral
-O FuriaBot é um chatbot desenvolvido para fornecer informações e interagir com fãs do time de eSports FURIA. Ele oferece funcionalidades como consulta de próximos jogos, status ao vivo, resultados recentes, elenco atual, notícias, histórico de conquistas, curiosidades, memes e respostas personalizadas com uma personalidade "fanboy".
+Um chatbot interativo para fãs da equipe de CS:GO da FURIA, feito com FastAPI, React e GPT-4, integrando scraping em tempo real da HLTV e salvamento de histórico com SQLite.
 
-## Funcionalidades Implementadas
+---
 
-### Essencial (MVP)
-- **Próximos Jogos**: Exibe data, hora e adversário dos próximos jogos da FURIA.
-- **Status ao Vivo**: Responde se a FURIA está jogando no momento.
-- **Últimos Resultados**: Mostra os resultados mais recentes dos jogos da FURIA.
-- **Elenco Atual**: Lista os jogadores atuais do time de CS:GO.
-- **Últimas Notícias**: Integração com um feed de notícias para exibir atualizações sobre a FURIA.
+## 🔍 Visão Geral
 
-### Funcionalidades Adicionais
-- **Histórico de Conquistas**: Apresenta os principais títulos e conquistas do time.
-- **Trivia/Quiz**: Oferece curiosidades e perguntas sobre a FURIA para os usuários.
-- **Memes e Clips Icônicos**: Links para memes e clipes famosos relacionados ao time, incluindo conteúdo do Gaules.
-- **Respostas Engraçadas**: Respostas com uma personalidade "fanboy" para interagir de forma divertida com os usuários.
+Este projeto foi desenvolvido como parte de um desafio técnico da FURIA Tech. A proposta consiste em criar uma interface conversacional voltada para fãs do time de CS:GO da FURIA, permitindo interações como:
 
-## Stack Utilizada
-- **Frontend**: React.js com Tailwind CSS para uma interface moderna e responsiva.
-- **Backend (API)**: Python com FastAPI para gerenciar as funcionalidades e integrações.
-- **Chatbot**: Integração com a API do DeepSeek para respostas inteligentes.
-- **Banco de Dados**: PostgreSQL para armazenamento de dados dinâmicos e persistentes.
+- Perguntas sobre escalação, próximos jogos e estatísticas
+- Interface web customizada com visual inspirado na identidade da FURIA
+- Integração com GPT-4 da Azure para gerar respostas contextualizadas
+- Scraping da HLTV para fornecer dados reais da equipe
+- Armazenamento de mensagens com SQLite para manter o histórico de conversas
 
-## Requisitos do Sistema
-- **Linguagem**: Python (Backend) e JavaScript (Frontend).
-- **Dependências**: React.js, Tailwind CSS, FastAPI, PostgreSQL, API do DeepSeek.
-- **Ambiente**: Sistema operacional compatível com as ferramentas acima e acesso à internet para APIs externas.
+---
 
-## Instalação
-1. Clone o repositório:
-    ```bash
-    git clone https://github.com/seu-usuario/FuriaChatBot.git
-    ```
-2. Navegue até o diretório do projeto:
-    ```bash
-    cd Api
-    ```
-3. Instale as dependências do backend:
-    ```bash
+## ✅ Funcionalidades Implementadas
+
+- 💬 **Chat em tempo real com IA** (GPT-4 via Azure API)
+- 📅 **Reconhecimento de palavras-chave** para adaptar o prompt automaticamente (ex: "próximo jogo", "escalação")
+- 🔎 **Web scraping da HLTV.org** para obter lineup e eventos
+- 🗃️ **Armazenamento de mensagens** usando SQLite com SQLAlchemy async
+- 🧠 **Limite de tokens controlado** com `tiktoken` para evitar estouros
+- 🌐 **Frontend React + Tailwind** com scroll inteligente e layout responsivo
+- 🔁 **Memória do chat baseada no banco de dados**, reutilizando o histórico limitado por tokens
+
+---
+
+## 🧱 Estrutura do Projeto
+```shell
+📦 FuriaChatBot 
+├── api/
+│ ├── main.py - FastAPI com endpoints e integração GPT + scraping
+│ ├── crud.py - Funções de banco (salvar/buscar mensagens)
+│ ├── model.py - Modelo SQLAlchemy da tabela 'messages'
+│ ├── db.py - Conexão com SQLite
+├── frontend/
+│ ├── App.jsx - Componente principal React do chat
+│ ├── assets/ - Logos e imagens da interface
+├── chat.db - Banco local SQLite (ignorado no Git)
+├── .env - Token da Azure (não versionado)
+├── .gitignore - Ignora arquivos sensíveis e locais
+```
+
+---
+
+## ▶️ Como rodar o projeto
+
+### Backend (FastAPI)
+
+1. Crie o ambiente virtual:
+```bash
+    python -m venv venv
+    source venv/bin/activate  # ou venv\Scripts\activate no Windows
+```
+
+2. Instale as dependências:
+```bash
     pip install -r requirements.txt
-    ```
-4. Navegue até o diretório do projeto:
-    ```bash
-    cd..
-    cd Front
-    ```
-3. Instale as dependências do Frontend:
-    ```bash
+```
+
+3. Crie um arquivo .env com seu token:
+```bash
+    GITHUB_TOKEN=seu_token_GitHub
+```
+4. Inicie a API:
+```bash
+    uvicorn main:app --reload
+```
+
+### Frontend (React)
+
+1. Instale as dependências:
+```bash
     npm install
-    ```
-6. Configure o banco de dados PostgreSQL e as variáveis de ambiente necessárias.
+```
 
-## Uso
-1. Inicie o backend:
-    ```bash
-    uvicorn app.main:app --reload
-    ```
-2. Inicie o frontend:
-    ```bash
-    npm start
-    ```
-3. Acesse a interface do FuriaBot no navegador e interaja com o chatbot.
+2. Inicie a aplicação:
+```bash
+    npm run dev
+```
 
-## Contribuição
-- Faça um fork do repositório.
-- Crie uma branch para suas alterações:
-    ```bash
-    git checkout -b minha-branch
-    ```
-- Envie um pull request com suas contribuições.
+---
+## 🛑 Requisitos
+
+- Python 3.10+
+- Node.js + npm
+- SQLite (vem embutido)
+- Conta na Azure OpenAI com acesso ao GPT-4
+- Biblioteca tiktoken para cálculo de tokens
+
+# 🧾 Observações
+- O banco chat.db está ignorado via .gitignore para evitar versionamento de dados locais.
+
+- A API da HLTV não é oficial. O scraping pode quebrar se a estrutura do site mudar.
+
+- O sistema de tokens foi limitado para evitar estouro de contexto da Azure (máximo: 8000 tokens).
+
+## ✍️ Autor
+Desenvolvido por Lucas Mateus Gonçalves de Góes no desafio técnico da FURIA Tech 2025.
