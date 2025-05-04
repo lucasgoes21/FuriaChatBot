@@ -98,5 +98,8 @@ Este projeto foi desenvolvido como parte de um desafio técnico da FURIA Tech. A
 
 - O sistema de tokens foi limitado para evitar estouro de contexto da Azure (máximo: 8000 tokens).
 
+## 🌐 Acesso ao Projeto
+Você pode acessar a aplicação hospedada neste link:
+🔗 [https://furiachatbot-on2.vercel.app/](https://furiachatbot-on2.vercel.app/)
 ## ✍️ Autor
 Desenvolvido por Lucas Mateus Gonçalves de Góes no desafio técnico da FURIA Tech 2025.
